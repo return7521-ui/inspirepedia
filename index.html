@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Inspirepedia: Endless Quotes & Facts</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+    body { font-family:Arial,sans-serif;background: #f7f7fc; color:#1e293b; margin:0;}
+    header {background: #1565c0; color:#fff; padding:1em 0; text-align:center;}
+    nav {background: #e3f2fd; padding:0.5em; text-align:center;}
+    nav button {background:#42a5f5;color:#fff;border:none;padding:0.6em 1.2em;margin:0 0.5em;font-size:1em;border-radius:6px;cursor:pointer;}
+    nav button.active {background:#1565c0;}
+    #main {max-width:480px;margin:2em auto;background:#fff;border-radius:14px;box-shadow:0 6px 24px #b5b5c848;padding:2em;}
+    img {border-radius:10px;width:100%;max-height:260px;object-fit:cover;}
+    .entry {margin-bottom:2em;}
+    .text {font-size:1.25em;margin:1.2em 0 0.4em 0;}
+    .credit {color:#555;font-style:italic;}
+    button.next {margin-top:1em;background:#43a047;padding:0.7em 2em;color:#fff;border:none;border-radius:6px;font-size:1.05em;cursor:pointer;}
+    button.next:hover {background:#2e7d32;}
+    footer {text-align:center;color:#999;margin:2em 0 1em 0;}
+</style>
+</head>
+<body>
+<header><h1>Inspirepedia</h1><div>Endless Quotes & Facts — Each With a Stunning Image</div></header>
+<nav>
+  <button id="quotesTab" class="active" onclick="showTab('quote')">Quotes</button>
+  <button id="factsTab" onclick="showTab('fact')">Facts</button>
+</nav>
+<div id="main">
+  <div id="content" class="entry"></div>
+  <button class="next" onclick="loadContent()">Next</button>
+</div>
+<footer>&copy; 2025 Inspirepedia. Built for endless inspiration and curiosity. 100% ad-free.</footer>
+<script>
+let currentTab = "quote";
+
+async function loadContent() {
+    const entryDiv = document.getElementById('content');
+    entryDiv.innerHTML = "Loading...";
+    if (currentTab === "quote") {
+        let data = await fetch('https://api.quotable.io/random').then(r=>r.json());
+        let {content, author} = data;
+        let keyword = (author || "motivation").split(' ')[0];
+        let imgUrl = `https://source.unsplash.com/600x400/?${encodeURIComponent(keyword)},inspiration`;
+        entryDiv.innerHTML = `<img src="${imgUrl}" alt="Relevant image">
+        <div class="text">"${content}"</div>
+        <div class="credit">&mdash; ${author}</div>`;
+    } else {
+        let data = await fetch('https://uselessfacts.jsph.pl/random.json?language=en').then(r=>r.json());
+        let {text, source_url} = data;
+        let match = text.match(/\b(\w{5,})\b/);
+        let keyword = match ? match[1] : "science";
+        let imgUrl = `https://source.unsplash.com/600x400/?${encodeURIComponent(keyword)},fact`;
+        entryDiv.innerHTML = `<img src="${imgUrl}" alt="Relevant image">
+        <div class="text">${text}</div>
+        ${source_url ? `<div class="credit"><a href="${source_url}" target="_blank">Source</a></div>` : ''}`;
+    }
+}
+
+function showTab(tab) {
+    currentTab = tab;
+    document.getElementById('quotesTab').classList.toggle("active", tab === "quote");
+    document.getElementById('factsTab').classList.toggle("active", tab === "fact");
+    loadContent();
+}
+
+showTab("quote");
+</script>
+</body>
+</html>
