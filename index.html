@@ -71,11 +71,12 @@
     }
     .card-img {
         width:100%;
-        height:250px;
+        height:280px;
         object-fit:cover;
         border-radius:15px;
         margin-bottom:1.5em;
         box-shadow:0 5px 15px rgba(0,0,0,0.2);
+        display:block;
     }
     .text {
         font-size:1.3em;
@@ -124,8 +125,9 @@
         text-align:center;
         color:#718096;
         font-size:1.2em;
+        padding:2em;
     }
-    a {color:#4299e1;text-decoration:none;}
+    a {color:#4299e1;text-decoration:none;font-weight:600;}
     a:hover {text-decoration:underline;}
 </style>
 </head>
@@ -150,33 +152,38 @@
 <script>
 let currentTab="quote";
 
-const fallbackImages={
-    quote:"https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600&h=400&fit=crop",
-    fact:"https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&h=400&fit=crop"
-};
+function getRandomImageId(){
+    return Math.floor(Math.random()*1000)+1;
+}
 
 async function loadContent(){
     const div=document.getElementById('content');
     div.innerHTML='<div class="loading">⏳ Loading...</div>';
+    
     try{
         if(currentTab==="quote"){
             const data=await fetch('https://api.quotable.io/random').then(r=>r.json());
             const {content,author}=data;
-            const keyword=(author||"motivation").split(' ')[0].toLowerCase();
-            const imgUrl=`https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600&h=400&fit=crop&q=80`;
-            div.innerHTML=`<img class="card-img" src="${imgUrl}" alt="Inspirational image" onerror="this.src='https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=600&h=400&fit=crop'">
+            const randomId=getRandomImageId();
+            const cacheBuster=Date.now();
+            const imgUrl=`https://picsum.photos/600/280?random=${randomId}&t=${cacheBuster}`;
+            
+            div.innerHTML=`<img class="card-img" src="${imgUrl}" alt="Inspirational background" loading="eager">
             <div class="text">"${content}"</div>
             <div class="credit">— ${author}</div>`;
         }else{
             const data=await fetch('https://uselessfacts.jsph.pl/random.json?language=en').then(r=>r.json());
             const {text,source_url}=data;
-            const imgUrl='https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&h=400&fit=crop&q=80';
-            div.innerHTML=`<img class="card-img" src="${imgUrl}" alt="Fact image" onerror="this.src='https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&h=400&fit=crop'">
+            const randomId=getRandomImageId();
+            const cacheBuster=Date.now();
+            const imgUrl=`https://picsum.photos/600/280?random=${randomId}&t=${cacheBuster}`;
+            
+            div.innerHTML=`<img class="card-img" src="${imgUrl}" alt="Interesting fact background" loading="eager">
             <div class="text">${text}</div>
-            ${source_url?`<div class="credit"><a href="${source_url}" target="_blank">📚 Source</a></div>`:''}`;
+            ${source_url?`<div class="credit"><a href="${source_url}" target="_blank" rel="noopener">📚 Source</a></div>`:''}`;
         }
     }catch(e){
-        div.innerHTML='<div class="loading">❌ Error loading content. Please try again.</div>';
+        div.innerHTML='<div class="loading">❌ Error loading content. Please click Next to try again.</div>';
     }
 }
 
